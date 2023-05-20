@@ -16,7 +16,8 @@ bool sub_menu(int opcion){
     cout<<endl;
 
     identificacion();
-    cout<<""
+    cout<<"prueba";
+    cout<<"prueba 2 kkk";
 }
 
 //Funcion que muestra el menu principal en pantalla
