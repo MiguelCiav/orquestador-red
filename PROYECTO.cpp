@@ -179,6 +179,15 @@ bool sub_menu(int opcion){
     return false;
 }
 
+//Funcion que muestra los creditos
+
+void creditos(){
+    cout<<endl;
+    cout<<"Proyecto hecho con amol por Carlos Zavarce y Miguel Ciavato"<<endl;
+    cout<<"Garantizamos 0 bugs en este codigo"<<endl;
+    cout<<"Junio, 2023"<<endl;
+}
+
 //Funcion que muestra el menu principal en pantalla
 
 void menu(){
@@ -223,6 +232,7 @@ void menu(){
                 break;
 
             case 5:
+                creditos();
                 break;
             
             case 6:
