@@ -14,7 +14,8 @@ class ListaRelaciones;
 class Dispositivo{
     private:
         string hostname;
-        string ip; 
+        string ip;
+        int numeroDeRelaciones;
 
     public:
         ListaRelaciones *relaciones;
@@ -24,11 +25,13 @@ class Dispositivo{
         Dispositivo(string hostname, string ip);
         string getHostname();
         string getIp();
+        void sumarNumeroDeRelaciones();
 };
 
 Dispositivo::Dispositivo(string hostname, string ip){
     this->hostname = hostname;
     this->ip = ip;
+    numeroDeRelaciones = 0;
     siguiente = nullptr;
     anterior = nullptr;
 }
@@ -39,6 +42,10 @@ string Dispositivo::getHostname(){
 
 string Dispositivo::getIp(){
     return ip;
+}
+
+void Dispositivo::sumarNumeroDeRelaciones(){
+    numeroDeRelaciones++;
 }
 
 //SECCION_2: CLASE Relacion
@@ -143,10 +150,8 @@ Dispositivo* ListaDispositivo::buscarPorIP(string ip){
 //SECCION_4: CLASE ListaRelaciones
 
 class ListaRelaciones{
-    private:
-        Relacion* lista;
-    
     public:
+        Relacion* lista;
         void insertarElemento(string tipoDeConexion, int ping, Dispositivo* destino);
         void mostrarListado();
         ListaRelaciones();
@@ -179,7 +184,126 @@ void ListaRelaciones::mostrarListado(){
     }
 }
 
-//SECCION 5: CLASE Utilitaria
+//SECCION 5: BACKTRACKING
+
+//5.1. Pila de dispositivos recorridos
+
+struct nodo{
+    Dispositivo* Dispositivo;
+    nodo* next;
+};
+
+class pilaDispositivos{
+    private:
+        nodo* head;
+
+    public:
+        void insertarElemento(Dispositivo* Dispositivo);
+        bool verificarExistencia(Dispositivo* Dispositivo);
+        void imprimirPila();
+        Dispositivo* extraerElemento();
+        pilaDispositivos();
+    
+};
+
+pilaDispositivos::pilaDispositivos(){
+    head = nullptr;
+}
+
+void pilaDispositivos::imprimirPila(){
+
+    nodo* auxiliar = head;
+
+    while(auxiliar != nullptr){
+
+        cout<<auxiliar->Dispositivo->getHostname()<<" - ";
+        auxiliar = auxiliar->next;
+
+    }
+}
+
+void pilaDispositivos::insertarElemento(Dispositivo* Dispositivo){
+
+    if(head == nullptr){
+        head = new nodo;
+        head->Dispositivo = Dispositivo;
+        head->next = nullptr;
+    } else {
+        nodo* nuevoNodo = new nodo;
+        nuevoNodo->next = head;
+        nuevoNodo->Dispositivo = Dispositivo;
+        head = nuevoNodo;
+    }
+
+}
+
+bool pilaDispositivos::verificarExistencia(Dispositivo* Dispositivo){
+
+    nodo* comparador = head;
+
+    while(comparador != nullptr){
+        if(comparador->Dispositivo->getHostname() == Dispositivo->getHostname()){
+            return true;
+        }
+        comparador = comparador->next;
+    }
+
+    return false;
+}
+
+Dispositivo* pilaDispositivos::extraerElemento(){
+    
+    if(head != nullptr){
+
+        nodo* aux = head;
+        Dispositivo* retorno = head->Dispositivo;
+        head = head->next;
+        delete aux;
+        return retorno;
+
+    }
+
+    return nullptr;
+}
+
+void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila){
+
+    Relacion* relacionActual = origen->relaciones->lista;
+
+    while(relacionActual != nullptr){
+
+        if(!pila.verificarExistencia(relacionActual->destino)){
+
+            if(relacionActual->destino->getHostname() == destino->getHostname()){
+
+                cout<<"DESTINO CONSEGUIDO ";
+                cout<<destino->getHostname()<<" - ";
+                pila.imprimirPila();
+                cout<<endl;
+
+            } else {
+
+                pila.insertarElemento(relacionActual->destino);
+                BuscarRuta(relacionActual->destino, destino, pila);
+
+            }
+        }
+
+        relacionActual = relacionActual->siguiente;
+    }
+
+    pila.extraerElemento();
+
+}
+
+void crearRelacion(Dispositivo *&Dispositivo1, Dispositivo *&Dispositivo2, int ping, string conexion){
+
+    Dispositivo1->relaciones->insertarElemento(conexion,ping,Dispositivo2);
+    Dispositivo2->relaciones->insertarElemento(conexion,ping,Dispositivo1);
+
+}
+
+//SECCION 6: CLASE Utilitaria
 
 class Utilitaria{
     Dispositivo Dispositivos;
@@ -206,28 +330,8 @@ class Utilitaria{
 };
 
 int main(){
-    ListaDispositivo dispositivos;
 
-    //Crear dispositivos en una lista de dispositivos
 
-    dispositivos.insertarElemento("ABC","192.168.0.1");
-    dispositivos.insertarElemento("DEF","192.168.1.1");
-    dispositivos.mostrarListado();
-
-    //Buscar por hostname
-
-    cout<<endl<<"PRUEBA BUSQUEDA: "<<endl;
-    Dispositivo *d1 = dispositivos.buscarPorHostname("ABC");
-    cout<<d1->getHostname()<<" "<<d1->getIp();
-    cout<<endl;
-
-    //Crear Relacion
-
-    cout<<endl<<"PRUEBA RELACION: "<<endl;
-
-    d1->relaciones = new ListaRelaciones; //Crear una nueva lista de relaciones en el dispositivo
-    d1->relaciones->insertarElemento("5G",124, dispositivos.buscarPorHostname("DEF")); //Insertar "DEF"
-    d1->relaciones->mostrarListado(); //Mostrar relaciones
 
     return 0;
 }
