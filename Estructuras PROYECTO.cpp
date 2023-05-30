@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <string>
+
 using namespace std;
 
 //SECCION_0: Adelanto de declaraciones
@@ -91,7 +92,6 @@ class ListaRelaciones{
         bool verificarExistencia(Dispositivo* destino);
         Relacion* buscarRelacion(Dispositivo* destino);
         void eliminarRelacion(Dispositivo *destino);
-        Relacion* buscarRelacion(Dispositivo* destino);
         ListaRelaciones();
 };
 
@@ -104,7 +104,7 @@ void ListaRelaciones::insertarElemento(string tipoDeConexion, int ping, Disposit
 
     if(lista == nullptr){
         lista = nuevaRelacion;
-    } else {
+    } else { 
         nuevaRelacion->siguiente = lista;
         lista->anterior = nuevaRelacion;
         lista = nuevaRelacion;
@@ -211,9 +211,17 @@ void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
         
     }
 
+    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente == nullptr){
+        Dispositivo->anterior->siguiente = nullptr;
+    }
+
     if(lista == Dispositivo){
 
-        lista = Dispositivo->siguiente;
+        if(lista->siguiente == nullptr){
+            lista = nullptr;
+        } else {
+            lista = Dispositivo->siguiente;
+        }
 
     }
 
@@ -440,25 +448,6 @@ int main(){
     dispositivos.crearRelacion(dispositivos.buscarPorHostname("D1"), dispositivos.buscarPorHostname("D2"), 124, "5G");
     dispositivos.crearRelacion(dispositivos.buscarPorHostname("D2"), dispositivos.buscarPorHostname("D3"), 124, "5G");
     dispositivos.crearRelacion(dispositivos.buscarPorHostname("D3"), dispositivos.buscarPorHostname("D4"), 124, "5G");
-
-    //SALIDA:
-
-    cout<<"DISPOSITIVOS: "<<endl<<endl;
-    dispositivos.mostrarListado();
-    cout<<endl;
-
-    cout<<"RELACIONES: "<<endl<<endl;
-    cout<<"- D1:"<<endl;
-    dispositivos.buscarPorHostname("D1")->relaciones->mostrarListado();
-
-    cout<<endl<<"- D2:"<<endl;
-    dispositivos.buscarPorHostname("D2")->relaciones->mostrarListado();
-
-    cout<<endl<<"- D3:"<<endl;
-    dispositivos.buscarPorHostname("D3")->relaciones->mostrarListado();
-
-    cout<<endl<<"- D4:"<<endl;
-    dispositivos.buscarPorHostname("D4")->relaciones->mostrarListado();
 
     return 0;
 }
