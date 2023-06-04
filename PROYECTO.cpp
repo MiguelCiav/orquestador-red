@@ -52,7 +52,6 @@ class Relacion{
     public:
         string tipoDeConexion; 
         int ping;
-        int saltos;
 
     public:
         Dispositivo *destino;
@@ -190,7 +189,7 @@ class ListaDispositivo{
         void insertarElemento(string hostname, string ip);
         void crearRelacion(Dispositivo* A, Dispositivo* B, int ping, string tipoDeConexion);
         void mostrarListado();
-        void eliminarDispositivo(Dispositivo *Dispositivo);
+        void eliminarDispositivo(ofstream &DispositivosRespaldo, Dispositivo *Dispositivo);
         Dispositivo* buscarPorHostname(string hostname);
         Dispositivo* buscarPorIP(string ip);
         ListaDispositivo();
@@ -201,7 +200,10 @@ ListaDispositivo::ListaDispositivo(){
     lista = nullptr;
 }
 
-void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
+void ListaDispositivo::eliminarDispositivo(ofstream &DispositivosRespaldo, Dispositivo *Dispositivo){
+
+    Utilitaria tool;
+    tool.CargarDispositivoDelete( DispositivosRespaldo, Dispositivo->hostname, Dispositivo->ip);
 
     if(Dispositivo->anterior != nullptr && Dispositivo->siguiente != nullptr){
 
@@ -227,7 +229,7 @@ void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
     delete Dispositivo;
 }
 
-void ListaDispositivo::insertarElemento(string hostname, string ip){
+void ListaDispositivo::insertarElemento( string hostname, string ip){
     Dispositivo *nuevoDispositivo = new Dispositivo(hostname, ip);
 
     if(lista == nullptr){
@@ -401,17 +403,47 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
 //SECCION 6: CLASE Utilitaria
 
 class Utilitaria{
-    Dispositivo Dispositivos;
+    public:
+    Utilitaria(){}
     ifstream archivoDescarga;
     ofstream archivoCarga;
     int L;
     int R;
 
-    void Cargar( ){
 
+void CargarDispositivoExist(ofstream &DispositivosNew, string hostname, string ip){
+
+     DispositivosNew << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+}
+
+void CargarDispositivoDelete(ofstream &DispositivosRespaldo, string hostname, string ip){
+    DispositivosRespaldo << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+}
+
+void CargarRuta( ofstream &RutasEliminadas){
+
+}
+
+ void MostrarListado(string Dispositivos_dat, string Dispositivos_resp_dat, string  rutas_resp_dat, int N){
+        if (N > 0 and N < 4 ){
+            switch (N) {
+            case 1:
+                
+                break;
+            case 2:
+                
+                break;
+                
+            case 3:
+                
+                break;
+            }
+        }else{
+            cout << "Opcion invalida" << endl;
+        }
     }
 
-void  Descargar (string filename, ifstream &archivo, int L, int R, ListaDispositivo NewLD){
+void  Descargar (string filename, ifstream &archivo, ofstream DispositivosNew, int L, int R, ListaDispositivo NewLD){
         if (archivo.is_open()){
             archivo >> L;
             for (int i = 0; i < L; i++){
@@ -678,6 +710,10 @@ void menu(){
                 break;
             
             case 6:
+                CargarDispositivoExist();
+                DispositivosNew.close();
+                DispositivosRespaldo.close();
+                RutasEliminadas.close();
                 break;
 
             default:
@@ -693,12 +729,21 @@ int main(){
 
     ListaDispositivo dispositivos;
 
+    string Dispositivo_dat = "Dispositivo_dat";
+    ofstream DispositivosNew (Dispositivo_dat.c_str());
+
+    string Dispositivos_resp_dat = "Dispositivos_resp_dat";
+    ofstream DispositivosRespaldo (Dispositivos_resp_dat.c_str());
+
+    string rutas_resp_dat = "rutas_resp_dat";
+    ofstream RutasEliminadas (rutas_resp_dat.c_str());
+
     //PROCEDIMIENTO PARA CREAR NUEVOS DISPOSITIVOS
 
-    dispositivos.insertarElemento("D1","192.168.1.1");
-    dispositivos.insertarElemento("D2","192.168.0.1");
-    dispositivos.insertarElemento("D3","192.168.1.1");
-    dispositivos.insertarElemento("D4","192.168.1.1");
+    dispositivos.insertarElemento( "D1","192.168.1.1");
+    dispositivos.insertarElemento( "D2","192.168.0.1");
+    dispositivos.insertarElemento( "D3","192.168.1.1");
+    dispositivos.insertarElemento( "D4","192.168.1.1");
 
     //PROCEDIMIENTO PARA CREAR LISTAS DE RELACIONES EN DISPOSITIVOS
 
