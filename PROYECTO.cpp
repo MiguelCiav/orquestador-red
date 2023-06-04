@@ -414,27 +414,31 @@ void  Descargar (string filename, ifstream &archivo, int L, int R){
         if (archivo.is_open()){
             archivo >> L;
             for (int i = 0; i < L; i++){
-                Dispositivo NewD;
-                archivo >> NewD.hostname;
-                archivo >> NewD.ip;
+                
+                string hostname;
+                string ip;
+                archivo >> hostname;
+                archivo >> ip;
                 ListaDispositivo NewLD;
-                NewLD.insertarElemento(NewD.hostname, NewD.ip);
+                NewLD.insertarElemento(hostname, ip);
             }
             
             archivo >> R;
             for (int i = 0; i < R; i++){
-                Relacion NewR;
                 ListaDispositivo NewLD;
                 string hostname1;
                 string hostname2;
+                int saltos;
+                int ping;
+                string tipoDeConexion;
                 archivo >> hostname1;
                 archivo >> hostname2;
                 Dispositivo * A = NewLD.buscarPorHostname (hostname1);
                 Dispositivo * B = NewLD.buscarPorHostname (hostname2);
-                archivo >> NewR.saltos;
-                archivo >> NewR.ping;
-                archivo >> NewR.tipoDeConexion;
-                NewLD.crearRelacion(A, B, NewR.ping, NewR.tipoDeConexion);
+                archivo >> saltos;
+                archivo >> ping;
+                archivo >> tipoDeConexion;
+                NewLD.crearRelacion(A, B, ping, tipoDeConexion);
             }
             archivo.close();
 		} else {
