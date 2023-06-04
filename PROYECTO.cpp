@@ -6,6 +6,7 @@ using namespace std;
 //SECCION_0: Adelanto de declaraciones
 
 class ListaRelaciones;
+class Utilitaria;
 
 //SECCION_1: CLASE Dispositivo
 
@@ -189,44 +190,16 @@ class ListaDispositivo{
         void insertarElemento(string hostname, string ip);
         void crearRelacion(Dispositivo* A, Dispositivo* B, int ping, string tipoDeConexion);
         void mostrarListado();
-        void eliminarDispositivo(ofstream &DispositivosRespaldo, Dispositivo *Dispositivo);
+        void eliminarDispositivo(Dispositivo *Dispositivo);
         Dispositivo* buscarPorHostname(string hostname);
         Dispositivo* buscarPorIP(string ip);
         ListaDispositivo();
 };
+
 ListaDispositivo NewLD;
 
 ListaDispositivo::ListaDispositivo(){
     lista = nullptr;
-}
-
-void ListaDispositivo::eliminarDispositivo(ofstream &DispositivosRespaldo, Dispositivo *Dispositivo){
-
-    Utilitaria tool;
-    tool.CargarDispositivoDelete( DispositivosRespaldo, Dispositivo->hostname, Dispositivo->ip);
-
-    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente != nullptr){
-
-        Dispositivo->anterior->siguiente = Dispositivo->siguiente;
-        Dispositivo->siguiente->anterior = Dispositivo->anterior;
-        
-    }
-
-    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente == nullptr){
-        Dispositivo->anterior->siguiente = nullptr;
-    }
-
-    if(lista == Dispositivo){
-
-        if(lista->siguiente == nullptr){
-            lista = nullptr;
-        } else {
-            lista = Dispositivo->siguiente;
-        }
-
-    }
-
-    delete Dispositivo;
 }
 
 void ListaDispositivo::insertarElemento( string hostname, string ip){
@@ -370,6 +343,8 @@ Dispositivo* pilaDispositivos::extraerElemento(){
     return nullptr;
 }
 
+//5.2. Función que busca rutas entre dispositivos
+
 void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila){
 
     Relacion* relacionActual = origen->relaciones->lista;
@@ -404,78 +379,129 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
 
 class Utilitaria{
     public:
-    Utilitaria(){}
-    ifstream archivoDescarga;
-    ofstream archivoCarga;
-    int L;
-    int R;
+        ifstream archivoDescarga;
+        ofstream archivoCarga;
+        int L;
+        int R;
 
-
-void CargarDispositivoExist(ofstream &DispositivosNew, string hostname, string ip){
-
-     DispositivosNew << "<" << hostname << ">, " << "<" << ip << ">" << endl;
-}
-
-void CargarDispositivoDelete(ofstream &DispositivosRespaldo, string hostname, string ip){
-    DispositivosRespaldo << "<" << hostname << ">, " << "<" << ip << ">" << endl;
-}
-
-void CargarRuta( ofstream &RutasEliminadas){
-
-}
-
- void MostrarListado(string Dispositivos_dat, string Dispositivos_resp_dat, string  rutas_resp_dat, int N){
-        if (N > 0 and N < 4 ){
-            switch (N) {
-            case 1:
-                
-                break;
-            case 2:
-                
-                break;
-                
-            case 3:
-                
-                break;
-            }
-        }else{
-            cout << "Opcion invalida" << endl;
-        }
-    }
-
-void  Descargar (string filename, ifstream &archivo, ofstream DispositivosNew, int L, int R, ListaDispositivo NewLD){
-        if (archivo.is_open()){
-            archivo >> L;
-            for (int i = 0; i < L; i++){
-                
-                string hostname;
-                string ip;
-                archivo >> hostname;
-                archivo >> ip;
-                NewLD.insertarElemento(hostname, ip);
-            }
+        void CargarDispositivoExist(ofstream &DispositivosNew, string hostname, string ip){
             
-            archivo >> R;
-            for (int i = 0; i < R; i++){
-                string hostname1;
-                string hostname2;
-                int ping;
-                string tipoDeConexion;
-                archivo >> hostname1;
-                archivo >> hostname2;
-                Dispositivo * A = NewLD.buscarPorHostname (hostname1);
-                Dispositivo * B = NewLD.buscarPorHostname (hostname2);
-                archivo >> ping;
-                archivo >> tipoDeConexion;
-                NewLD.crearRelacion(A, B, ping, tipoDeConexion);
+            DispositivosNew << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+
+        }
+
+        void CargarDispositivoDelete(string hostname, string ip){
+
+            archivoCarga.open("../Dispositivos_resp.dat");
+            archivoCarga << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+            archivoCarga.close();
+
+        }
+
+        void CargarRuta(ofstream &RutasEliminadas){
+
+            return;
+
+        }
+
+        void MostrarListado(string Dispositivos_dat, string Dispositivos_resp_dat, string  rutas_resp_dat, int N){
+            if (N > 0 and N < 4 ){
+                switch (N) {
+                case 1:
+                    
+                    break;
+                case 2:
+                    
+                    break;
+                    
+                case 3:
+                    
+                    break;
+                }
+            }else{
+                cout << "Opcion invalida" << endl;
             }
-            archivo.close();
-		} else {
-		cout << "No se pudo abrir el archivo" << endl;
-	    }
+        }
+
+        void Descargar(){
+            
+            archivoDescarga.open("../dispositivos.dat");
+
+            if (archivoDescarga.is_open()){
+                archivoDescarga >> L;
+                for (int i = 0; i < L; i++){
+                    
+                    string hostname;
+                    string ip;
+
+                    archivoDescarga >> hostname;
+                    archivoDescarga >> ip;
+
+                    NewLD.insertarElemento(hostname, ip);
+                    NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
+
+                }
+                
+                archivoDescarga >> R;
+                for (int i = 0; i < R; i++){
+
+                    string hostname1;
+                    string hostname2;
+                    int ping;
+                    string tipoDeConexion;
+
+                    archivoDescarga >> hostname1;
+                    archivoDescarga >> hostname2;
+
+                    Dispositivo *A = NewLD.buscarPorHostname(hostname1);
+                    Dispositivo *B = NewLD.buscarPorHostname(hostname2);
+
+                    archivoDescarga >> ping;
+                    archivoDescarga >> tipoDeConexion;
+
+                    NewLD.crearRelacion(A, B, ping, tipoDeConexion);
+
+                }
+
+                archivoDescarga.close();
+
+            } else {
+
+                cout << "No se pudo abrir el archivo" << endl;
+
+            }
+
+        }
+};
+
+void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
+
+    Utilitaria tool;
+    tool.CargarDispositivoDelete(Dispositivo->hostname, Dispositivo->ip);
+
+    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente != nullptr){
+
+        Dispositivo->anterior->siguiente = Dispositivo->siguiente;
+        Dispositivo->siguiente->anterior = Dispositivo->anterior;
+        
+    }
+
+    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente == nullptr){
+        Dispositivo->anterior->siguiente = nullptr;
+    }
+
+    if(lista == Dispositivo){
+
+        if(lista->siguiente == nullptr){
+            lista = nullptr;
+        } else {
+            lista = Dispositivo->siguiente;
+        }
 
     }
-};
+
+    delete Dispositivo;
+}
 
 //Funcion que imprime en pantalla los datos de universidad, facultad, escuela etc...
 
@@ -710,10 +736,12 @@ void menu(){
                 break;
             
             case 6:
-                CargarDispositivoExist();
+
+                /*CargarDispositivoExist();
                 DispositivosNew.close();
                 DispositivosRespaldo.close();
                 RutasEliminadas.close();
+                */
                 break;
 
             default:
@@ -727,7 +755,17 @@ void menu(){
     
 int main(){
 
-    ListaDispositivo dispositivos;
+    Utilitaria prueba;
+
+    prueba.Descargar();
+
+    NewLD.mostrarListado();
+    NewLD.buscarPorHostname("A")->relaciones->mostrarListado();
+    NewLD.buscarPorHostname("B")->relaciones->mostrarListado();
+
+    NewLD.eliminarDispositivo(NewLD.buscarPorHostname("A"));
+
+    /*ListaDispositivo dispositivos;
 
     string Dispositivo_dat = "Dispositivo_dat";
     ofstream DispositivosNew (Dispositivo_dat.c_str());
@@ -759,6 +797,7 @@ int main(){
     dispositivos.crearRelacion(dispositivos.buscarPorHostname("D3"), dispositivos.buscarPorHostname("D4"), 124, "5G");
     
     dispositivos.mostrarListado();
+    */
 
     return 0;
 }
