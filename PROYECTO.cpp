@@ -10,7 +10,7 @@ class ListaRelaciones;
 //SECCION_1: CLASE Dispositivo
 
 class Dispositivo{
-    private:
+    public:
         string hostname;
         string ip;
         int numeroDeRelaciones;
@@ -49,9 +49,10 @@ void Dispositivo::sumarNumeroDeRelaciones(){
 //SECCION_2: CLASE Relacion
 
 class Relacion{
-    private:
+    public:
         string tipoDeConexion; 
         int ping;
+        int saltos;
 
     public:
         Dispositivo *destino;
@@ -409,15 +410,36 @@ class Utilitaria{
 
     }
 
-    void  Descargar (){
-
-    }
-
-    void crearRelaciones(){
-
-    }
-
-    void buscarRelaciones() {
+void  Descargar (string filename, ifstream &archivo, int L, int R){
+        if (archivo.is_open()){
+            archivo >> L;
+            for (int i = 0; i < L; i++){
+                Dispositivo NewD;
+                archivo >> NewD.hostname;
+                archivo >> NewD.ip;
+                ListaDispositivo NewLD;
+                NewLD.insertarElemento(NewD.hostname, NewD.ip);
+            }
+            
+            archivo >> R;
+            for (int i = 0; i < R; i++){
+                Relacion NewR;
+                ListaDispositivo NewLD;
+                string hostname1;
+                string hostname2;
+                archivo >> hostname1;
+                archivo >> hostname2;
+                Dispositivo * A = NewLD.buscarPorHostname (hostname1);
+                Dispositivo * B = NewLD.buscarPorHostname (hostname2);
+                archivo >> NewR.saltos;
+                archivo >> NewR.ping;
+                archivo >> NewR.tipoDeConexion;
+                NewLD.crearRelacion(A, B, NewR.ping, NewR.tipoDeConexion);
+            }
+            archivo.close();
+		} else {
+		cout << "No se pudo abrir el archivo" << endl;
+	    }
 
     }
 };
