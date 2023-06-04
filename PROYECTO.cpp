@@ -195,6 +195,7 @@ class ListaDispositivo{
         Dispositivo* buscarPorIP(string ip);
         ListaDispositivo();
 };
+ListaDispositivo NewLD;
 
 ListaDispositivo::ListaDispositivo(){
     lista = nullptr;
@@ -410,7 +411,7 @@ class Utilitaria{
 
     }
 
-void  Descargar (string filename, ifstream &archivo, int L, int R){
+void  Descargar (string filename, ifstream &archivo, int L, int R, ListaDispositivo NewLD){
         if (archivo.is_open()){
             archivo >> L;
             for (int i = 0; i < L; i++){
@@ -419,13 +420,11 @@ void  Descargar (string filename, ifstream &archivo, int L, int R){
                 string ip;
                 archivo >> hostname;
                 archivo >> ip;
-                ListaDispositivo NewLD;
                 NewLD.insertarElemento(hostname, ip);
             }
             
             archivo >> R;
             for (int i = 0; i < R; i++){
-                ListaDispositivo NewLD;
                 string hostname1;
                 string hostname2;
                 int saltos;
