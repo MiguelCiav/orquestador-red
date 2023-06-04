@@ -427,14 +427,12 @@ void  Descargar (string filename, ifstream &archivo, int L, int R, ListaDisposit
             for (int i = 0; i < R; i++){
                 string hostname1;
                 string hostname2;
-                int saltos;
                 int ping;
                 string tipoDeConexion;
                 archivo >> hostname1;
                 archivo >> hostname2;
                 Dispositivo * A = NewLD.buscarPorHostname (hostname1);
                 Dispositivo * B = NewLD.buscarPorHostname (hostname2);
-                archivo >> saltos;
                 archivo >> ping;
                 archivo >> tipoDeConexion;
                 NewLD.crearRelacion(A, B, ping, tipoDeConexion);
