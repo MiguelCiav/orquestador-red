@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -488,7 +489,7 @@ class Utilitaria{
 
         void Descargar(){
             
-            archivoDescarga.open("../dispositivos.dat");
+            archivoDescarga.open("../Dispositivos.dat");
 
             if (archivoDescarga.is_open()){
                 archivoDescarga >> L;
@@ -498,32 +499,53 @@ class Utilitaria{
                     string ip;
 
                     archivoDescarga >> hostname;
+                    quitarComa(hostname);
+
                     archivoDescarga >> ip;
+                    quitarComa(ip);
 
                     NewLD.insertarElemento(hostname, ip);
-                    NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
 
+                    NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
                 }
                 
                 archivoDescarga >> R;
+
                 for (int i = 0; i < R; i++){
 
                     string hostname1;
                     string hostname2;
-                    int ping;
+                    string ping;
+                    int pingEntero;
                     string tipoDeConexion;
 
                     archivoDescarga >> hostname1;
+                    quitarComa(hostname1),
+
                     archivoDescarga >> hostname2;
+                    quitarComa(hostname2);
 
                     Dispositivo *A = NewLD.buscarPorHostname(hostname1);
+
+                    if(A == nullptr){
+                        A = NewLD.buscarPorIP(hostname1);
+                    }
+
                     Dispositivo *B = NewLD.buscarPorHostname(hostname2);
 
+                    if(B == nullptr){
+                        B = NewLD.buscarPorIP(hostname2);
+                    }
+
                     archivoDescarga >> ping;
+                    quitarComa(ping);
+
+                    pingEntero = stoi(ping);
+
                     archivoDescarga >> tipoDeConexion;
+                    quitarComa(tipoDeConexion);
 
-                    NewLD.crearRelacion(A, B, ping, tipoDeConexion);
-
+                    NewLD.crearRelacion(A, B, pingEntero, tipoDeConexion);
                 }
 
                 archivoDescarga.close();
