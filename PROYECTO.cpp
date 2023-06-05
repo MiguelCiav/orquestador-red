@@ -623,6 +623,41 @@ class Utilitaria{
             arregloDispositivos[j].hostname = temp1;
             arregloDispositivos[j].ip = temp2;
         }
+        void MostrarArchivo1(){
+            for (int i = 0; i < L; i++){
+                cout << arregloDispositivos[i].getHostname();
+                cout << ", ";
+                cout << arregloDispositivos[i].getIp();
+                cout << endl;
+            }
+        }
+
+
+        void MostrarArchivo2() {
+            ifstream archivoCarga("../Dispositivos_resp.dat");
+            if (archivoCarga.is_open()) {
+                string linea;
+                while (getline(archivoCarga, linea)) {
+                    cout << linea << endl;
+                }
+                archivoCarga.close();
+            } else {
+                cout << "No se pudo abrir el archivo" << endl;
+            }
+        }
+
+        void MostrarArchivo3() {
+            ifstream archivoCarga("../Rutas_resp.dat");
+            if (archivoCarga.is_open()) {
+                string linea;
+                while (getline(archivoCarga, linea)) {
+                    cout << linea << endl;
+                }
+                archivoCarga.close();
+            } else {
+                cout << "No se pudo abrir el archivo" << endl;
+            }
+        }
 };
 
 Utilitaria tool;
@@ -1237,12 +1272,15 @@ bool sub_menu(char opcion){
 
             switch (sub_opcion) {
                 case '1':
+                    tool.MostrarArchivo1();
                     break;
             
                 case '2':
+                    tool.MostrarArchivo2();
                     break;
 
                 case '3':
+                    tool.MostrarArchivo3 ();
                     break;
 
                 case '4':
