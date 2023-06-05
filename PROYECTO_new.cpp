@@ -7,6 +7,14 @@ using namespace std;
 
 class ListaRelaciones;
 
+void quitarComa(string &palabra){
+
+    if(palabra.at(palabra.length() - 1) == ','){
+        palabra.pop_back();
+    }
+
+}
+
 //SECCION_1: CLASE Dispositivo
 
 class Dispositivo{
@@ -89,6 +97,7 @@ class ListaRelaciones{
         bool verificarExistencia(Dispositivo* destino);
         Relacion* buscarRelacion(Dispositivo* destino);
         void eliminarRelacion(Dispositivo *destino);
+        void eliminarAdyacentes(Dispositivo* origen);
         ListaRelaciones();
 };
 
@@ -196,32 +205,6 @@ ListaDispositivo::ListaDispositivo(){
     lista = nullptr;
 }
 
-void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
-
-    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente != nullptr){
-
-        Dispositivo->anterior->siguiente = Dispositivo->siguiente;
-        Dispositivo->siguiente->anterior = Dispositivo->anterior;
-        
-    }
-
-    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente == nullptr){
-        Dispositivo->anterior->siguiente = nullptr;
-    }
-
-    if(lista == Dispositivo){
-
-        if(lista->siguiente == nullptr){
-            lista = nullptr;
-        } else {
-            lista = Dispositivo->siguiente;
-        }
-
-    }
-
-    delete Dispositivo;
-}
-
 void ListaDispositivo::insertarElemento(string hostname, string ip){
     Dispositivo *nuevoDispositivo = new Dispositivo(hostname, ip);
 
@@ -298,6 +281,8 @@ void ListaDispositivo::eliminarRelacion(Dispositivo* A, Dispositivo* B, int &can
     }
 
 }
+
+ListaDispositivo NewLD;
 
 //SECCION 5: BACKTRACKING
 
@@ -456,42 +441,132 @@ void eliminarRutas(ListaDispositivo Dispositivos, Dispositivo* origen, Dispositi
 //SECCION 6: CLASE Utilitaria
 
 class Utilitaria{
-    Dispositivo Dispositivos;
-    ifstream archivoDescarga;
-    ofstream archivoCarga;
-    int L;
-    int R;
+    public:
+        ifstream archivoDescarga;
+        ofstream archivoCarga;
+        int L;
+        int R;
 
-    void Cargar( ){
+        void CargarDispositivoExist(ofstream &DispositivosNew, string hostname, string ip){
+            
+            DispositivosNew << "<" << hostname << ">, " << "<" << ip << ">" << endl;
 
-    }
+        }
 
-    void  Descargar (){
+        void CargarDispositivoDelete(string hostname, string ip){
 
-    }
+            archivoCarga.open("../Dispositivos_resp.dat");
+            archivoCarga << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+            archivoCarga.close();
 
-    void crearRelaciones(){
+        }
 
-    }
+        void CargarRuta(ofstream &RutasEliminadas){
 
-    void buscarRelaciones() {
+            return;
 
-    }
+        }
+
+        void MostrarListado(string Dispositivos_dat, string Dispositivos_resp_dat, string  rutas_resp_dat, int N){
+            if (N > 0 and N < 4 ){
+                switch (N) {
+                case 1:
+                    
+                    break;
+                case 2:
+                    
+                    break;
+                    
+                case 3:
+                    
+                    break;
+                }
+            }else{
+                cout << "Opcion invalida" << endl;
+            }
+        }
+
+        void Descargar(){
+            
+            archivoDescarga.open("../dispositivos.dat");
+
+            if (archivoDescarga.is_open()){
+                archivoDescarga >> L;
+                for (int i = 0; i < L; i++){
+                    
+                    string hostname;
+                    string ip;
+
+                    archivoDescarga >> hostname;
+                    archivoDescarga >> ip;
+
+                    NewLD.insertarElemento(hostname, ip);
+                    NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
+
+                }
+                
+                archivoDescarga >> R;
+                for (int i = 0; i < R; i++){
+
+                    string hostname1;
+                    string hostname2;
+                    int ping;
+                    string tipoDeConexion;
+
+                    archivoDescarga >> hostname1;
+                    archivoDescarga >> hostname2;
+
+                    Dispositivo *A = NewLD.buscarPorHostname(hostname1);
+                    Dispositivo *B = NewLD.buscarPorHostname(hostname2);
+
+                    archivoDescarga >> ping;
+                    archivoDescarga >> tipoDeConexion;
+
+                    NewLD.crearRelacion(A, B, ping, tipoDeConexion);
+
+                }
+
+                archivoDescarga.close();
+
+            } else {
+
+                cout << "No se pudo abrir el archivo" << endl;
+
+            }
+
+        }
 };
 
-//Declaración global de la lista de dispositivos
+void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
 
-ListaDispositivo dispositivos;
+    Utilitaria tool;
+    tool.CargarDispositivoDelete(Dispositivo->getHostname(), Dispositivo->getIp());
 
-//Funciones de cada parte del Menú
+    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente != nullptr){
 
-void quitarComa(string &palabra){
-
-    if(palabra.at(palabra.length() - 1) == ','){
-        palabra.pop_back();
+        Dispositivo->anterior->siguiente = Dispositivo->siguiente;
+        Dispositivo->siguiente->anterior = Dispositivo->anterior;
+        
     }
 
+    if(Dispositivo->anterior != nullptr && Dispositivo->siguiente == nullptr){
+        Dispositivo->anterior->siguiente = nullptr;
+    }
+
+    if(lista == Dispositivo){
+
+        if(lista->siguiente == nullptr){
+            lista = nullptr;
+        } else {
+            lista = Dispositivo->siguiente;
+        }
+
+    }
+
+    delete Dispositivo;
 }
+
+//Funciones de cada parte del Menú
 
 void agregarDispositivo(){
 
@@ -503,8 +578,8 @@ void agregarDispositivo(){
 
     quitarComa(hostname);
 
-    dispositivos.insertarElemento(hostname,ip);
-    dispositivos.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
+    NewLD.insertarElemento(hostname,ip);
+    NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
     cout<<"El dispositivo "<<hostname<<" ha sido agregado.";
     cout<<endl;
 
@@ -529,8 +604,8 @@ void agregarRuta(){
 
     pingEntero = stoi(pingEntrada);
 
-    dispositivos.crearRelacion(dispositivos.buscarPorHostname(hostname1),
-    dispositivos.buscarPorHostname(hostname2),pingEntero,tipoDeConexion);
+    NewLD.crearRelacion(NewLD.buscarPorHostname(hostname1),
+    NewLD.buscarPorHostname(hostname2),pingEntero,tipoDeConexion);
 
     cout<<"Se agrego una ruta entre "<<hostname1<<" y "<<hostname2<<".";
     cout<<endl;
@@ -539,26 +614,179 @@ void agregarRuta(){
 
 void eliminarRuta(){
 
-    string stringOHostname1;
-    string stringOHostname2;
+    string ipOHostname1;
+    string ipOHostname2;
     Dispositivo *dispositivo1;
     Dispositivo *dispositivo2;
     pilaDispositivos pila;
     pilaDispositivos soluciones;
 
-    cin>>stringOHostname1;
-    cin>>stringOHostname2;
+    cin>>ipOHostname1;
+    cin>>ipOHostname2;
 
-    quitarComa(stringOHostname1);
+    quitarComa(ipOHostname1);
 
-    dispositivo1 = dispositivos.buscarPorHostname(stringOHostname1);
-    dispositivo2 = dispositivos.buscarPorHostname(stringOHostname2);
+    dispositivo1 = NewLD.buscarPorHostname(ipOHostname1);
+    dispositivo2 = NewLD.buscarPorHostname(ipOHostname2);
 
     if(dispositivo1 != nullptr && dispositivo2 != nullptr){
 
         pila.insertarElemento(dispositivo1);
-        eliminarRutas(dispositivos,dispositivo1,dispositivo2);
+        eliminarRutas(NewLD,dispositivo1,dispositivo2);
+        return;
 
+    }
+
+    dispositivo1 = NewLD.buscarPorIP(ipOHostname1);
+    dispositivo2 = NewLD.buscarPorIP(ipOHostname2);
+
+    if(dispositivo1 != nullptr && dispositivo2 != nullptr){
+
+        pila.insertarElemento(dispositivo1);
+        eliminarRutas(NewLD,dispositivo1,dispositivo2);
+
+    }
+
+}
+
+void eliminarAdyacentes(Dispositivo* Origen){
+
+    Relacion* actual = Origen->relaciones->lista;
+    Relacion* aux;
+
+    while(actual != nullptr){
+        aux = actual;
+        aux->destino->relaciones->eliminarRelacion(Origen);
+        actual = actual->siguiente;
+        delete aux;
+    }
+
+}
+
+void EliminarDispositivo(){
+    string hostname;
+
+    cin>>hostname;
+    eliminarAdyacentes(NewLD.buscarPorHostname(hostname));
+    NewLD.eliminarDispositivo(NewLD.buscarPorHostname(hostname));
+    
+    cout<<"El dispositivo "<<hostname<<" fue eliminado del sistema.";
+    cout<<endl;
+}
+
+void consultarDispositivo(){
+
+    string ipOHostname;
+    Dispositivo* dispositivo;
+
+    cin>>ipOHostname;
+
+    quitarComa(ipOHostname);
+
+    dispositivo = NewLD.buscarPorHostname(ipOHostname);
+
+    if(dispositivo != nullptr){
+        cout<<dispositivo->getHostname()<<" "<<dispositivo->getIp();
+        return;
+    }
+
+    dispositivo = NewLD.buscarPorIP(ipOHostname);
+
+    if(dispositivo != nullptr){
+        cout<<dispositivo->getHostname()<<" "<<dispositivo->getIp();
+    }
+
+}
+
+void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
+
+    Dispositivo* aux;
+    aux = soluciones.extraerElemento();
+    int cantidad = 1;
+    int saltos = 0;
+    bool inicio = true;
+
+    while(aux != nullptr){
+
+        if(aux->getHostname() == origen->getHostname() && inicio != true){
+            cout<<"Saltos: "<<saltos;
+            cantidad++;
+            saltos = 0;
+            cout<<endl;
+        }
+         
+        cout<<aux->getHostname()<<", ";
+        aux = soluciones.extraerElemento();
+
+        inicio = false;
+    }
+
+    if(inicio != true){
+        cout<<endl<<"Total de rutas encontradas: "<<cantidad<<endl;
+    }
+
+}
+
+void buscarRutasEntreDispositivos(){
+
+    string ipOHostname1;
+    string ipOHostname2;
+    Dispositivo *Dispositivo1;
+    Dispositivo *Dispositivo2;
+
+    cin>>ipOHostname1;
+    cin>>ipOHostname2;
+
+    Dispositivo1 = NewLD.buscarPorHostname(ipOHostname1);
+
+    if(Dispositivo1 == nullptr){
+        Dispositivo1 = NewLD.buscarPorIP(ipOHostname1);
+    }
+
+    Dispositivo2 = NewLD.buscarPorHostname(ipOHostname2);
+
+    if(Dispositivo2 == nullptr){
+        Dispositivo2 = NewLD.buscarPorIP(ipOHostname2);
+    }
+
+    pilaDispositivos pila;
+    pilaDispositivos soluciones;
+
+    pila.insertarElemento(Dispositivo1);
+    BuscarRuta(Dispositivo1,Dispositivo2,pila,soluciones);
+    
+    cout<<"Entre los dispositivos "<<Dispositivo1->getHostname()<<
+    " y "<<Dispositivo2->getHostname()<<" se encontraron las siguientes rutas: \n";
+
+    imprimirSoluciones(soluciones,Dispositivo1);
+
+}
+
+void ListadoDeDispositivos(){
+
+    NewLD.mostrarListado();
+
+}
+
+void dispositivosAdyacentes(){
+
+    string ipOHostname;
+    Dispositivo* dispositivo;
+
+    cin>>ipOHostname;
+
+    dispositivo = NewLD.buscarPorHostname(ipOHostname);
+
+    if(dispositivo != nullptr){
+        cout<<"Los dispositivos adyacentes a "<<dispositivo->getHostname()<<" son: \n\n";
+        dispositivo->relaciones->mostrarListado();
+        return;
+    }
+
+    dispositivo = NewLD.buscarPorIP(ipOHostname);
+
+    if(dispositivo != nullptr){
+        dispositivo->relaciones->mostrarListado();
     }
 
 }
@@ -580,7 +808,7 @@ bool sub_menu(char opcion){
     
     char sub_opcion = 0;
 
-    //Agregar informacion
+    //Agregar informacion LISTO
     if(opcion == '1'){
 
         while(sub_opcion != '3' || sub_opcion != '4'){
@@ -636,6 +864,7 @@ bool sub_menu(char opcion){
 
             switch (sub_opcion) {
                 case '1':
+                    EliminarDispositivo();
                     break;
             
                 case '2':
@@ -675,15 +904,19 @@ bool sub_menu(char opcion){
 
             switch (sub_opcion) {
                 case '1':
+                    consultarDispositivo();
                     break;
             
                 case '2':
+                    ListadoDeDispositivos();
                     break;
 
                 case '3':
+                    buscarRutasEntreDispositivos();
                     break;
 
                 case '4':
+                    dispositivosAdyacentes();
                     break;
 
                 case '5':
@@ -754,6 +987,10 @@ void creditos(){
 //Funcion que muestra el menu principal en pantalla
 
 void menu(){
+
+    Utilitaria tool;
+    tool.Descargar();
+
     char opcion = '0';
     
     while(opcion != '6'){
