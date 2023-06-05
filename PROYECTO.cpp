@@ -493,9 +493,17 @@ class Utilitaria{
 
         }
 
-        void cargarRuta(){
+        void cargarRuta(string hostname, bool finDeRuta){
+            
+            archivoCarga.open("../resultados.dat", std::ios::app);
 
-
+            if(finDeRuta){
+                archivoCarga << endl;
+                archivoCarga.close();
+            } else {
+                archivoCarga << hostname << ", ";
+            }
+            
         }
 
         void Descargar(){
@@ -932,12 +940,15 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
             cout<<"Saltos: "<<saltos;
             cantidad++;
             saltos = 0;
+            tool.cargarRuta("", true);
             cout<<endl;
         }
-         
+        
         cout<<aux->getHostname()<<", ";
+        tool.cargarRuta(aux->getHostname(), false);
         aux = soluciones.extraerElemento();
 
+        saltos++;
         inicio = false;
     }
 
