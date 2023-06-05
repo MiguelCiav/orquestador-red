@@ -558,39 +558,49 @@ class Utilitaria{
 
         }
 
-        Dispositivo *ModArreglo(Dispositivo Listado[],int indicador, int &L, string hostaname, string ip){
-        if (int indicador == 1){
-            int L2 = L+1;
-            Dispositivo NewListado[L2];
-            for(int i = 0; i < L2; i++){
-                if (i < L){
-                    NewListado [i] = Listado [i];
-                }else{
-                    NewListado [i].hostname = hostname;
-                    NewListado [i].ip = ip;
+        Dispositivo *ModArreglo(Dispositivo Listado[],int indicador, int &L, string hostname, string ip){
+            if (indicador == 1){
+                const int L2 = L+1;
+                Dispositivo NewListado[L2];
+
+                for(int i = 0; i < L2; i++){
+                    if (i < L){
+                        NewListado [i] = Listado [i];
+                    }else{
+                        NewListado [i].hostname = hostname;
+                        NewListado [i].ip = ip;
+                    }
                 }
-            }
-            L = L2;
-            return NewListado;
-        }else if (indicador == 2){
-            int L2 = L-1;
-            int x = 0;
-            Dispositivo NewListado[L2];
-            for(int i = 0; i < L; i++){
-                if (Listado[i].hostname == hostname and Listado[i].hostname == ip ){
-                    x = 1;
-                }else if (x = 0){
-                    NewListado[i].hostname  = hostname;
-                    NewListado [i].ip = ip;
-                }else if (x = 1){
-                    NewListado [i-1].hostname = hostname;
-                    NewListado [i-1].ip = ip;
+
+                L = L2;
+
+                return NewListado;
+
+            } else if (indicador == 2) {
+
+                const int L2 = L-1;
+                int x = 0;
+
+                Dispositivo NewListado[L2];
+
+                for(int i = 0; i < L; i++) {
+
+                    if (Listado[i].hostname == hostname and Listado[i].hostname == ip ){
+                        x = 1;
+                    }else if (x = 0){
+                        NewListado[i].hostname  = hostname;
+                        NewListado [i].ip = ip;
+                    }else if (x = 1){
+                        NewListado [i-1].hostname = hostname;
+                        NewListado [i-1].ip = ip;
+                    }
+
                 }
+
+                L = L2;
+                return NewListado;
             }
-            L = L2;
-            return NewListado;
         }
-    }
 
     void ListadoDeDispositivos(Dispositivo Listado[], int L){
         for (int i = 0; i < L; i++){
