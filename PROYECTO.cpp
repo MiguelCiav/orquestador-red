@@ -952,21 +952,20 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
         if(aux->getHostname() == origen->getHostname() && iteraciones != 0){
 
             saltos++;
+            cout<<"Saltos: "<<saltos<<endl;
             cout<<aux->getHostname()<<", ";
-            cout<<"Saltos: "<<saltos;
             tool.cargarRuta(aux->getHostname(), saltos);
 
             cantidad++;
             saltos = 0;
-            cout<<endl;
 
         } else if(iteraciones == (soluciones.getSize() - 1)){
 
             saltos++;
             cout<<aux->getHostname()<<", ";
-            cout<<"Saltos: "<<saltos;
+            cout<<"Saltos: "<<saltos<<endl;
+            
             tool.cargarRuta(aux->getHostname(), saltos);
-            cout<<endl;
 
         } else {
 
