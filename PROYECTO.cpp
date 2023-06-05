@@ -317,11 +317,13 @@ struct nodo{
 class pilaDispositivos{
     private:
         nodo* head;
+        int size;
 
     public:
         void insertarElemento(Dispositivo* Dispositivo);
         bool verificarExistencia(Dispositivo* Dispositivo);
         void copiarPila(pilaDispositivos &pilaNueva);
+        int getSize();
         void imprimirPila();
         Dispositivo* extraerElemento();
         pilaDispositivos();
@@ -330,6 +332,11 @@ class pilaDispositivos{
 
 pilaDispositivos::pilaDispositivos(){
     head = nullptr;
+    size = 0;
+}
+
+int pilaDispositivos::getSize(){
+    return size;
 }
 
 void pilaDispositivos::imprimirPila(){
@@ -357,6 +364,8 @@ void pilaDispositivos::insertarElemento(Dispositivo* Dispositivo){
         head = nuevoNodo;
     }
 
+    size++;
+
 }
 
 bool pilaDispositivos::verificarExistencia(Dispositivo* Dispositivo){
@@ -382,6 +391,7 @@ Dispositivo* pilaDispositivos::extraerElemento(){
         head = head->next;
         delete aux;
         return retorno;
+        size--;
 
     }
 
@@ -493,17 +503,22 @@ class Utilitaria{
 
         }
 
-        void cargarRuta(string hostname, bool finDeRuta){
+        void cargarRuta(string hostname){
             
             archivoCarga.open("../resultados.dat", std::ios::app);
-
-            if(finDeRuta){
-                archivoCarga << endl;
-                archivoCarga.close();
-            } else {
-                archivoCarga << hostname << ", ";
-            }
+            archivoCarga << hostname << ", ";
+            archivoCarga.close();
             
+        }
+
+        void cargarRuta(string hostname, int saltos){
+
+            archivoCarga.open("../resultados.dat", std::ios::app);
+            archivoCarga << hostname;
+            archivoCarga << ", Saltos: " << saltos;
+            archivoCarga << endl;
+            archivoCarga.close();
+
         }
 
         void Descargar(){
@@ -699,6 +714,7 @@ void agregarDispositivo(){
         cout<<"El dispositivo "<<hostname<<" ha sido agregado.";
         cout<<endl;
         tool.ModArreglo(1);
+        tool.cargarResultado("1");
 
     } else {
 
@@ -866,8 +882,6 @@ void ListaRelaciones::reescribirRelaciones(ofstream &archivo, Dispositivo* Orige
         archivo << actual->getTipoDeConexion();
         archivo << endl;
 
-        cout<<"CARGADO "<<Origen->getHostname()<<" "<<actual->destino->getHostname();
-
         aux = actual;
         aux->destino->relaciones->eliminarRelacion(Origen);
         actual = actual->siguiente;
@@ -930,28 +944,43 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
     Dispositivo* aux;
     aux = soluciones.extraerElemento();
     int cantidad = 1;
-    int saltos = 0;
-    bool inicio = true;
+    int saltos = -1;
+    int iteraciones = 0;
 
     while(aux != nullptr){
 
-        if(aux->getHostname() == origen->getHostname() && inicio != true){
+        if(aux->getHostname() == origen->getHostname() && iteraciones != 0){
+
+            saltos++;
+            cout<<aux->getHostname()<<", ";
             cout<<"Saltos: "<<saltos;
+            tool.cargarRuta(aux->getHostname(), saltos);
+
             cantidad++;
             saltos = 0;
-            tool.cargarRuta(" ", true);
             cout<<endl;
+
+        } else if(iteraciones == (soluciones.getSize() - 1)){
+
+            saltos++;
+            cout<<aux->getHostname()<<", ";
+            cout<<"Saltos: "<<saltos;
+            tool.cargarRuta(aux->getHostname(), saltos);
+            cout<<endl;
+
+        } else {
+
+            cout<<aux->getHostname()<<", ";
+            tool.cargarRuta(aux->getHostname());
+            saltos++;
+
         }
         
-        cout<<aux->getHostname()<<", ";
-        tool.cargarRuta(aux->getHostname(), false);
         aux = soluciones.extraerElemento();
-
-        saltos++;
-        inicio = false;
+        iteraciones++;
     }
 
-    if(inicio != true){
+    if(iteraciones > 0){
         cout<<endl<<"Total de rutas encontradas: "<<cantidad<<endl;
     } else {
         cout<<"No existen rutas entre los dispositivos, intente nuevamente. ";
