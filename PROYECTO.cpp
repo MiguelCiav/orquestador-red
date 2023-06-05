@@ -825,7 +825,6 @@ void eliminarRuta(){
 
         if(hayRutas == true){
             tool.cargarResultado("1");
-            tool.R = tool.R - cantidadEliminada;
         } else {
             cout<<"Los dispositivos ingresados no tienen rutas, pruebe nuevamente \n";
             tool.cargarResultado("0");
@@ -940,7 +939,7 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
             cout<<"Saltos: "<<saltos;
             cantidad++;
             saltos = 0;
-            tool.cargarRuta("", true);
+            tool.cargarRuta(" ", true);
             cout<<endl;
         }
         

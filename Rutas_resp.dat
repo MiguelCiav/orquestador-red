@@ -1,1 +1,8 @@
-
+B D 512 Fibra
+D A 24 6G
+A B 515 5G
+B D 141 5G
+A B 256 5G
+B C 265 Fibra
+C D 215 Aereo
+D A 261 teta
