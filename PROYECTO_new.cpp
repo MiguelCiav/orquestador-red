@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 
 using namespace std;
 
@@ -19,7 +18,7 @@ void quitarComa(string &palabra){
 //SECCION_1: CLASE Dispositivo
 
 class Dispositivo{
-    public:
+    private:
         string hostname;
         string ip;
         int numeroDeRelaciones;
@@ -28,7 +27,7 @@ class Dispositivo{
         ListaRelaciones *relaciones;
         Dispositivo *siguiente;
         Dispositivo *anterior;
-        Dispositivo (){}
+
         Dispositivo(string hostname, string ip);
         string getHostname();
         string getIp();
@@ -448,10 +447,10 @@ class Utilitaria{
         int L;
         int R;
 
-       void CargarDispositivoExist(ofstream &DispositivosNew, Dispositivo Listado[], int L){
-            for (int i = 0; i < L; i++) {
-            DispositivosNew << "<" << Listado[i].hostname << ">, " << "<" << Listado[i].ip << ">" << endl;
-            }
+        void CargarDispositivoExist(ofstream &DispositivosNew, string hostname, string ip){
+            
+            DispositivosNew << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+
         }
 
         void CargarDispositivoDelete(string hostname, string ip){
@@ -489,7 +488,7 @@ class Utilitaria{
 
         void Descargar(){
             
-            archivoDescarga.open("../Dispositivos.dat");
+            archivoDescarga.open("../dispositivos.dat");
 
             if (archivoDescarga.is_open()){
                 archivoDescarga >> L;
@@ -499,53 +498,32 @@ class Utilitaria{
                     string ip;
 
                     archivoDescarga >> hostname;
-                    quitarComa(hostname);
-
                     archivoDescarga >> ip;
-                    quitarComa(ip);
 
                     NewLD.insertarElemento(hostname, ip);
-
                     NewLD.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
+
                 }
                 
                 archivoDescarga >> R;
-
                 for (int i = 0; i < R; i++){
 
                     string hostname1;
                     string hostname2;
-                    string ping;
-                    int pingEntero;
+                    int ping;
                     string tipoDeConexion;
 
                     archivoDescarga >> hostname1;
-                    quitarComa(hostname1),
-
                     archivoDescarga >> hostname2;
-                    quitarComa(hostname2);
 
                     Dispositivo *A = NewLD.buscarPorHostname(hostname1);
-
-                    if(A == nullptr){
-                        A = NewLD.buscarPorIP(hostname1);
-                    }
-
                     Dispositivo *B = NewLD.buscarPorHostname(hostname2);
 
-                    if(B == nullptr){
-                        B = NewLD.buscarPorIP(hostname2);
-                    }
-
                     archivoDescarga >> ping;
-                    quitarComa(ping);
-
-                    pingEntero = stoi(ping);
-
                     archivoDescarga >> tipoDeConexion;
-                    quitarComa(tipoDeConexion);
 
-                    NewLD.crearRelacion(A, B, pingEntero, tipoDeConexion);
+                    NewLD.crearRelacion(A, B, ping, tipoDeConexion);
+
                 }
 
                 archivoDescarga.close();
@@ -557,67 +535,6 @@ class Utilitaria{
             }
 
         }
-
-        Dispositivo *ModArreglo(Dispositivo Listado[],int indicador, int &L, string hostaname, string ip){
-        if (int indicador == 1){
-            int L2 = L+1;
-            Dispositivo NewListado[L2];
-            for(int i = 0; i < L2; i++){
-                if (i < L){
-                    NewListado [i] = Listado [i];
-                }else{
-                    NewListado [i].hostname = hostname;
-                    NewListado [i].ip = ip;
-                }
-            }
-            L = L2;
-            return NewListado;
-        }else if (indicador == 2){
-            int L2 = L-1;
-            int x = 0;
-            Dispositivo NewListado[L2];
-            for(int i = 0; i < L; i++){
-                if (Listado[i].hostname == hostname and Listado[i].hostname == ip ){
-                    x = 1;
-                }else if (x = 0){
-                    NewListado[i].hostname  = hostname;
-                    NewListado [i].ip = ip;
-                }else if (x = 1){
-                    NewListado [i-1].hostname = hostname;
-                    NewListado [i-1].ip = ip;
-                }
-            }
-            L = L2;
-            return NewListado;
-        }
-    }
-
-    void ListadoDeDispositivos(Dispositivo Listado[], int L){
-        for (int i = 0; i < L; i++){
-        cout << "<" << Listado[i].hostname << ">, <" << Listado[i].ip << ">" << endl;
-        }
-    }
-
-    Dispositivo *OrdenarAlfabetico(Dispositivo Listado[], int L){
-        for (int i = 0; i < L; i++){
-            for (int j = i+1; j < L; j++ ){ 
-                if (Listado[i].hostname > Listado[j].hostname){
-                    swap(Listado, i, j);
-                }
-            }
-        }
-        return Listado;
-    }
-
-    Dispositivo *swap(Dispositivo Listado[], int i, int j) {
-        string temp1 = Listado[i].hostname;
-        string temp2 = Listado[i].ip;
-        Listado[i].hostname = Listado[j].hostname;
-        Listado[i].ip = Listado[j].ip;
-        Listado[j].hostname = temp1;
-        Listado[j].ip = temp2;
-        return Listado;
-    }
 };
 
 void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
