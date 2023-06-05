@@ -158,21 +158,17 @@ void ListaRelaciones::eliminarRelacion(Dispositivo *destino){
         
     }
 
-    if(aux->anterior == nullptr && aux->siguiente != nullptr){
-
-        aux->siguiente->anterior = nullptr;
-        
-    }
-
     if(aux->anterior != nullptr && aux->siguiente == nullptr){
-
         aux->anterior->siguiente = nullptr;
-        
     }
 
     if(lista == aux){
 
-        lista = aux->siguiente;
+        if(lista->siguiente == nullptr){
+            lista = nullptr;
+        } else {
+            lista = aux->siguiente;
+        }
 
     }
 
@@ -188,6 +184,7 @@ class ListaDispositivo{
     public:
         void insertarElemento(string hostname, string ip);
         void crearRelacion(Dispositivo* A, Dispositivo* B, int ping, string tipoDeConexion);
+        void eliminarRelacion(Dispositivo* A, Dispositivo* B, int &cantidadEliminada);
         void mostrarListado();
         void eliminarDispositivo(Dispositivo *Dispositivo);
         Dispositivo* buscarPorHostname(string hostname);
@@ -284,6 +281,24 @@ void ListaDispositivo::crearRelacion(Dispositivo* A, Dispositivo* B, int ping, s
 
 }
 
+void ListaDispositivo::eliminarRelacion(Dispositivo* A, Dispositivo* B, int &cantidadEliminada){
+
+    if(A->relaciones->verificarExistencia(B) && B->relaciones->verificarExistencia(A)){
+
+        cout<<B->getHostname()<<" ";
+        cout<<A->getHostname()<<" ";
+        cout<<A->relaciones->buscarRelacion(B)->getPing()<<" ";
+        cout<<A->relaciones->buscarRelacion(B)->getTipoDeConexion()<<endl;
+
+        A->relaciones->eliminarRelacion(B);
+        B->relaciones->eliminarRelacion(A);
+
+        cantidadEliminada++;
+
+    }
+
+}
+
 //SECCION 5: BACKTRACKING
 
 //5.1. Pila de dispositivos recorridos
@@ -300,6 +315,7 @@ class pilaDispositivos{
     public:
         void insertarElemento(Dispositivo* Dispositivo);
         bool verificarExistencia(Dispositivo* Dispositivo);
+        void copiarPila(pilaDispositivos &pilaNueva);
         void imprimirPila();
         Dispositivo* extraerElemento();
         pilaDispositivos();
@@ -366,7 +382,20 @@ Dispositivo* pilaDispositivos::extraerElemento(){
     return nullptr;
 }
 
-void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila){
+void pilaDispositivos::copiarPila(pilaDispositivos &pilaNueva){
+
+    nodo* aux = head;
+
+    while(aux != nullptr){
+        pilaNueva.insertarElemento(aux->Dispositivo);
+        aux = aux->next;
+    }
+
+};
+
+//5.2 Funcion BuscarRuta
+
+void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila, pilaDispositivos &soluciones){
 
     Relacion* relacionActual = origen->relaciones->lista;
 
@@ -376,15 +405,13 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
 
             if(relacionActual->destino->getHostname() == destino->getHostname()){
 
-                cout<<"DESTINO CONSEGUIDO ";
-                cout<<destino->getHostname()<<" - ";
-                pila.imprimirPila();
-                cout<<endl;
+                soluciones.insertarElemento(destino);
+                pila.copiarPila(soluciones);
 
             } else {
 
                 pila.insertarElemento(relacionActual->destino);
-                BuscarRuta(relacionActual->destino, destino, pila);
+                BuscarRuta(relacionActual->destino, destino, pila, soluciones);
 
             }
         }
@@ -393,6 +420,36 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
     }
 
     pila.extraerElemento();
+
+}
+
+//5.3 Funcion para eliminar rutas indirectas
+
+void eliminarRutas(ListaDispositivo Dispositivos, Dispositivo* origen, Dispositivo* destino){
+
+    pilaDispositivos pila;
+    pilaDispositivos soluciones;
+    int cantidadEliminada = 0;
+
+    pila.insertarElemento(origen); 
+
+    BuscarRuta(origen,destino,pila,soluciones);
+
+    Dispositivo *actual = nullptr;
+    Dispositivo *anterior = nullptr;
+
+    cout<<"Entre los dispositivos "<<origen->getHostname();
+    cout<<" y "<<destino->getHostname()<<" se eliminaron las siguientes rutas: \n\n";
+
+    do{ 
+        actual = soluciones.extraerElemento();
+        if(anterior != nullptr && actual != nullptr){
+            Dispositivos.eliminarRelacion(actual, anterior, cantidadEliminada);
+        }
+        anterior = actual;
+    }while(actual != nullptr);
+
+    cout<<endl<<"Total de rutas eliminadas: "<<cantidadEliminada<<endl;
 
 }
 
@@ -422,6 +479,90 @@ class Utilitaria{
     }
 };
 
+//Declaración global de la lista de dispositivos
+
+ListaDispositivo dispositivos;
+
+//Funciones de cada parte del Menú
+
+void quitarComa(string &palabra){
+
+    if(palabra.at(palabra.length() - 1) == ','){
+        palabra.pop_back();
+    }
+
+}
+
+void agregarDispositivo(){
+
+    string hostname;
+    string ip;
+
+    cin>>hostname;
+    cin>>ip;
+
+    quitarComa(hostname);
+
+    dispositivos.insertarElemento(hostname,ip);
+    dispositivos.buscarPorHostname(hostname)->relaciones = new ListaRelaciones;
+    cout<<"El dispositivo "<<hostname<<" ha sido agregado.";
+    cout<<endl;
+
+}
+
+void agregarRuta(){
+
+    string hostname1;
+    string hostname2;
+    string pingEntrada;
+    int pingEntero;
+    string tipoDeConexion;
+
+    cin>>hostname1;
+    cin>>hostname2;
+    cin>>pingEntrada;
+    cin>>tipoDeConexion;
+
+    quitarComa(hostname1);
+    quitarComa(hostname2);
+    quitarComa(pingEntrada);
+
+    pingEntero = stoi(pingEntrada);
+
+    dispositivos.crearRelacion(dispositivos.buscarPorHostname(hostname1),
+    dispositivos.buscarPorHostname(hostname2),pingEntero,tipoDeConexion);
+
+    cout<<"Se agrego una ruta entre "<<hostname1<<" y "<<hostname2<<".";
+    cout<<endl;
+
+}
+
+void eliminarRuta(){
+
+    string stringOHostname1;
+    string stringOHostname2;
+    Dispositivo *dispositivo1;
+    Dispositivo *dispositivo2;
+    pilaDispositivos pila;
+    pilaDispositivos soluciones;
+
+    cin>>stringOHostname1;
+    cin>>stringOHostname2;
+
+    quitarComa(stringOHostname1);
+
+    dispositivo1 = dispositivos.buscarPorHostname(stringOHostname1);
+    dispositivo2 = dispositivos.buscarPorHostname(stringOHostname2);
+
+    if(dispositivo1 != nullptr && dispositivo2 != nullptr){
+
+        pila.insertarElemento(dispositivo1);
+        eliminarRutas(dispositivos,dispositivo1,dispositivo2);
+
+    }
+
+}
+
 //Funcion que imprime en pantalla los datos de universidad, facultad, escuela etc...
 
 void identificacion(){
@@ -435,14 +576,14 @@ void identificacion(){
 /*Funcion que muestra los sub-menus, retorna true si se regresa al menu principal,
 retorna false si se quiere salir de la aplicacion*/
 
-bool sub_menu(int opcion){
+bool sub_menu(char opcion){
     
-    int sub_opcion = 0;
+    char sub_opcion = 0;
 
     //Agregar informacion
-    if(opcion == 1){
+    if(opcion == '1'){
 
-        while(sub_opcion != 3 || sub_opcion != 4){
+        while(sub_opcion != '3' || sub_opcion != '4'){
 
             cout<<endl;
             identificacion();
@@ -456,16 +597,18 @@ bool sub_menu(int opcion){
             cin>>sub_opcion;
 
             switch (sub_opcion) {
-                case 1:
+                case '1':
+                    agregarDispositivo();
                     break;
             
-                case 2:
+                case '2':
+                    agregarRuta();
                     break;
 
-                case 3:
+                case '3':
                     return true;
 
-                case 4:
+                case '4':
                     return false;
             
                 default:
@@ -476,9 +619,9 @@ bool sub_menu(int opcion){
     }
 
     //Eliminar informacion
-    if(opcion == 2){
+    if(opcion == '2'){
 
-        while(sub_opcion != 3 || sub_opcion != 4){
+        while(sub_opcion != '3' || sub_opcion != '4'){
 
             cout<<endl;
             identificacion();
@@ -492,16 +635,17 @@ bool sub_menu(int opcion){
             cin>>sub_opcion;
 
             switch (sub_opcion) {
-                case 1:
+                case '1':
                     break;
             
-                case 2:
+                case '2':
+                    eliminarRuta();
                     break;
 
-                case 3:
+                case '3':
                     return true;
 
-                case 4:
+                case '4':
                     return false;
             
                 default:
@@ -512,9 +656,9 @@ bool sub_menu(int opcion){
     }
 
     //Buscar y listar
-    if(opcion == 3){
+    if(opcion == '3'){
 
-        while(sub_opcion != 5 || sub_opcion != 6){
+        while(sub_opcion != '5' || sub_opcion != '6'){
 
             cout<<endl;
             identificacion();
@@ -530,22 +674,22 @@ bool sub_menu(int opcion){
             cin>>sub_opcion;
 
             switch (sub_opcion) {
-                case 1:
+                case '1':
                     break;
             
-                case 2:
+                case '2':
                     break;
 
-                case 3:
+                case '3':
                     break;
 
-                case 4:
+                case '4':
                     break;
 
-                case 5:
+                case '5':
                     return true;
 
-                case 6:
+                case '6':
                     return false;
             
                 default:
@@ -556,9 +700,9 @@ bool sub_menu(int opcion){
     }
 
     //Mostrar respaldos
-    if(opcion == 4){
+    if(opcion == '4'){
 
-        while(sub_opcion != 3 || sub_opcion != 4){
+        while(sub_opcion != '3' || sub_opcion != '4'){
 
             cout<<endl;
             identificacion();
@@ -573,19 +717,19 @@ bool sub_menu(int opcion){
             cin>>sub_opcion;
 
             switch (sub_opcion) {
-                case 1:
+                case '1':
                     break;
             
-                case 2:
+                case '2':
                     break;
 
-                case 3:
+                case '3':
                     break;
 
-                case 4:
+                case '4':
                     return true;
 
-                case 5:
+                case '5':
                     return false;
             
                 default:
@@ -610,9 +754,9 @@ void creditos(){
 //Funcion que muestra el menu principal en pantalla
 
 void menu(){
-    int opcion = 0;
+    char opcion = '0';
     
-    while(opcion != 6){
+    while(opcion != '6'){
 
         identificacion();
         cout<<"1. Agregar informacion"<<endl;
@@ -626,35 +770,35 @@ void menu(){
         cin>>opcion;
 
         switch(opcion){
-            case 1:
-                if(!sub_menu(1)){
-                    opcion = 6;
+            case '1':
+                if(!sub_menu('1')){
+                    opcion = '6';
                 }
                 break;
             
-            case 2:
-                if(!sub_menu(2)){
-                    opcion = 6;
+            case '2':
+                if(!sub_menu('2')){
+                    opcion = '6';
                 }
                 break;
             
-            case 3:
-                if(!sub_menu(3)){
-                    opcion = 6;
+            case '3':
+                if(!sub_menu('3')){
+                    opcion = '6';
                 }
                 break;
 
-            case 4:
-                if(!sub_menu(4)){
-                    opcion = 6;
+            case '4':
+                if(!sub_menu('4')){
+                    opcion = '6';
                 }
                 break;
 
-            case 5:
+            case '5':
                 creditos();
                 break;
             
-            case 6:
+            case '6':
                 break;
 
             default:
@@ -668,29 +812,7 @@ void menu(){
     
 int main(){
 
-    ListaDispositivo dispositivos;
-
-    //PROCEDIMIENTO PARA CREAR NUEVOS DISPOSITIVOS
-
-    dispositivos.insertarElemento("D1","192.168.1.1");
-    dispositivos.insertarElemento("D2","192.168.0.1");
-    dispositivos.insertarElemento("D3","192.168.1.1");
-    dispositivos.insertarElemento("D4","192.168.1.1");
-
-    //PROCEDIMIENTO PARA CREAR LISTAS DE RELACIONES EN DISPOSITIVOS
-
-    dispositivos.buscarPorHostname("D1")->relaciones = new ListaRelaciones;
-    dispositivos.buscarPorHostname("D2")->relaciones = new ListaRelaciones;
-    dispositivos.buscarPorHostname("D3")->relaciones = new ListaRelaciones;
-    dispositivos.buscarPorHostname("D4")->relaciones = new ListaRelaciones;
-
-    //PROCEDIMIENTO PARA CREAR RELACIONES ENTRE DISPOSITIVOS
-
-    dispositivos.crearRelacion(dispositivos.buscarPorHostname("D1"), dispositivos.buscarPorHostname("D2"), 124, "5G");
-    dispositivos.crearRelacion(dispositivos.buscarPorHostname("D2"), dispositivos.buscarPorHostname("D3"), 124, "5G");
-    dispositivos.crearRelacion(dispositivos.buscarPorHostname("D3"), dispositivos.buscarPorHostname("D4"), 124, "5G");
-    
-    dispositivos.mostrarListado();
+    menu();
 
     return 0;
 }
