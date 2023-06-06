@@ -274,9 +274,9 @@ void ListaDispositivo::crearRelacion(Dispositivo* A, Dispositivo* B, int ping, s
 
 void ListaDispositivo::eliminarRelacion(Dispositivo* A, Dispositivo* B, int &cantidadEliminada){
 
-    cout<<B->getHostname()<<" ";
-    cout<<A->getHostname()<<" ";
-    cout<<A->relaciones->buscarRelacion(B)->getPing()<<" ";
+    cout<<B->getHostname()<<", ";
+    cout<<A->getHostname()<<", ";
+    cout<<A->relaciones->buscarRelacion(B)->getPing()<<", ";
     cout<<A->relaciones->buscarRelacion(B)->getTipoDeConexion()<<endl;
 
     A->relaciones->eliminarRelacion(B);
@@ -499,7 +499,7 @@ class Utilitaria{
         void CargarDispositivoDelete(string hostname, string ip){
 
             archivoCarga.open("../Dispositivos_resp.dat", std::ios::app);
-            archivoCarga << "<" << hostname << ">, " << "<" << ip << ">" << endl;
+            archivoCarga  << hostname << ", " << ip << endl;
             archivoCarga.close();
 
         }
@@ -507,9 +507,9 @@ class Utilitaria{
         void CargarRutaDelete(Dispositivo* A, Dispositivo* B){
 
             archivoCarga.open("../Rutas_resp.dat", std::ios::app);
-            archivoCarga << B->getHostname() << " ";
-            archivoCarga << A->getHostname() << " ";
-            archivoCarga << A->relaciones->buscarRelacion(B)->getPing() << " ";
+            archivoCarga << B->getHostname() << ", ";
+            archivoCarga << A->getHostname() << ", ";
+            archivoCarga << A->relaciones->buscarRelacion(B)->getPing() << ", ";
             archivoCarga << A->relaciones->buscarRelacion(B)->getTipoDeConexion() << endl;
             archivoCarga.close();
 
@@ -981,19 +981,16 @@ void consultarDispositivo(){
 
     cin>>ipOHostname;
 
-    quitarComa(ipOHostname);
-
     dispositivo = NewLD.buscarPorHostname(ipOHostname);
 
-    if(dispositivo != nullptr){
-        cout<<dispositivo->getHostname()<<" "<<dispositivo->getIp();
-        return;
+    if(dispositivo == nullptr){
+        dispositivo = NewLD.buscarPorIP(ipOHostname);
     }
 
-    dispositivo = NewLD.buscarPorIP(ipOHostname);
-
-    if(dispositivo != nullptr){
-        cout<<dispositivo->getHostname()<<" "<<dispositivo->getIp();
+    if(dispositivo == nullptr){
+        cout<<"Dispositivo no encontrado, prueba nuevamente."<<endl;
+    } else {
+        cout<<dispositivo->getHostname()<<", "<<dispositivo->getIp()<<endl;
     }
 
 }
@@ -1097,7 +1094,7 @@ void buscarRutasEntreDispositivos(){
         BuscarRuta(D1,D2,pila,soluciones);
     
         cout<<"Entre los dispositivos "<<D1->getHostname()<<
-        " y "<<D2->getHostname()<<" se encontraron las siguientes rutas: \n";
+        " y "<<D2->getHostname()<<" se encontraron las siguientes rutas: \n\n";
 
         imprimirSoluciones(soluciones,D1); 
 
@@ -1111,7 +1108,8 @@ void ListadoDeDispositivos(){
 
     for(int i = 0; i < tool.L; i++){
 
-        cout<<tool.arregloDispositivos[i].getHostname()<<endl;
+        cout<<tool.arregloDispositivos[i].getHostname()<<", ";
+        cout<<tool.arregloDispositivos[i].getIp()<<endl;
 
     }
 
