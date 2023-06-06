@@ -1,9 +1,3 @@
-A, B, C, D, A, Saltos: 4
-D, A, Saltos: 2
-H, D, Saltos: 2
-A, H, D, A, Saltos: 3
-D, A, Saltos: 2
-B, C, D, Saltos: 3
-A, B, C, D, A, Saltos: 4
-D, A, Saltos: 2
-H, D, Saltos: 2
+A, B, C, D, Saltos: 3, Ping: 6
+A, D, Saltos: 1, Ping: 2
+A, H, D, Saltos: 2, Ping: 4

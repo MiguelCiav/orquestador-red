@@ -409,6 +409,20 @@ void pilaDispositivos::copiarPila(pilaDispositivos &pilaNueva){
 
 };
 
+int pingRuta[500];
+int pingAlmacenado = 0;
+int constPing = 0;
+
+void vaciarPing(){
+
+    for(int i = 0; i < 500; i++){
+        pingRuta[i] = 0;
+    }
+
+    pingAlmacenado = 0;
+    constPing = 0;
+}
+
 //5.2 Funcion BuscarRuta
 
 void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila, pilaDispositivos &soluciones){
@@ -419,10 +433,14 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
 
         if(!pila.verificarExistencia(relacionActual->destino)){
 
+            pingAlmacenado += relacionActual->getPing();
+
             if(relacionActual->destino->getHostname() == destino->getHostname()){
 
                 soluciones.insertarElemento(destino);
                 pila.copiarPila(soluciones);
+                pingRuta[constPing] = pingAlmacenado;
+                constPing++;
 
             } else {
 
@@ -430,6 +448,8 @@ void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pil
                 BuscarRuta(relacionActual->destino, destino, pila, soluciones);
 
             }
+
+            pingAlmacenado -= relacionActual->getPing();
         }
 
         relacionActual = relacionActual->siguiente;
@@ -514,9 +534,13 @@ class Utilitaria{
         void cargarRuta(string hostname, int saltos){
 
             archivoCarga.open("../resultados.dat", std::ios::app);
-            archivoCarga << hostname;
-            archivoCarga << ", Saltos: " << saltos;
+            archivoCarga << "Saltos: " << saltos;
+            archivoCarga << ", Ping: " << pingRuta[constPing];
             archivoCarga << endl;
+            
+            if(hostname != ""){
+                archivoCarga << hostname << ", ";
+            }
             archivoCarga.close();
 
         }
@@ -946,15 +970,16 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
     int cantidad = 1;
     int saltos = -1;
     int iteraciones = 0;
+    constPing--;
 
     while(aux != nullptr){
 
         if(aux->getHostname() == origen->getHostname() && iteraciones != 0){
 
-            saltos++;
-            cout<<"Saltos: "<<saltos<<endl;
+            cout << "Saltos: " << saltos << ", Ping: "<< pingRuta[constPing] << endl;
             cout<<aux->getHostname()<<", ";
             tool.cargarRuta(aux->getHostname(), saltos);
+            constPing--;
 
             cantidad++;
             saltos = 0;
@@ -963,9 +988,11 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
 
             saltos++;
             cout<<aux->getHostname()<<", ";
-            cout<<"Saltos: "<<saltos<<endl;
+            cout << "Saltos: " << saltos << ", Ping: " << pingRuta[constPing] << endl;
             
-            tool.cargarRuta(aux->getHostname(), saltos);
+            tool.cargarRuta(aux->getHostname());
+            tool.cargarRuta("", saltos);
+            constPing--;
 
         } else {
 
@@ -986,6 +1013,7 @@ void imprimirSoluciones(pilaDispositivos soluciones, Dispositivo* origen){
         tool.cargarResultado("0");
     }
 
+    vaciarPing();
 }
 
 void buscarRutasEntreDispositivos(){
