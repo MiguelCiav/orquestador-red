@@ -4,8 +4,6 @@
 
 using namespace std;
 
-//SECCION_0: Adelanto de declaraciones
-
 class ListaRelaciones;
 
 void quitarComa(string &palabra){
@@ -15,8 +13,6 @@ void quitarComa(string &palabra){
     }
 
 }
-
-//SECCION_1: CLASE Dispositivo
 
 class Dispositivo{
     public:
@@ -60,8 +56,6 @@ void Dispositivo::restarNumeroDeRelaciones(){
     numeroDeRelaciones--;
 }
 
-//SECCION_2: CLASE Relacion
-
 class Relacion{
     private:
         string tipoDeConexion; 
@@ -92,8 +86,6 @@ string Relacion::getTipoDeConexion(){
 int Relacion::getPing(){
     return ping;
 }
-
-//SECCION_3: CLASE ListaRelaciones
 
 class ListaRelaciones{
     public:
@@ -189,8 +181,6 @@ void ListaRelaciones::eliminarRelacion(Dispositivo *destino){
 
     delete aux;
 }
-
-//SECCION_4: CLASE ListaDispositivo
 
 class ListaDispositivo{
     public:
@@ -304,10 +294,6 @@ void ListaDispositivo::llenarArreglo(Dispositivo *&arregloDispositivos, int L){
     }
     
 }
-
-//SECCION 5: BACKTRACKING
-
-//5.1. Pila de dispositivos recorridos
 
 struct nodo{
     Dispositivo* Dispositivo;
@@ -423,8 +409,6 @@ void vaciarPing(){
     constPing = 0;
 }
 
-//5.2 Funcion BuscarRuta
-
 void BuscarRuta(Dispositivo* origen, Dispositivo* destino, pilaDispositivos &pila, pilaDispositivos &soluciones){
 
     Relacion* relacionActual = origen->relaciones->lista;
@@ -506,7 +490,7 @@ class Utilitaria{
 
         void CargarRutaDelete(Dispositivo* A, Dispositivo* B){
 
-            archivoCarga.open("../Rutas_resp.dat", std::ios::app);
+            archivoCarga.open("../rutas_resp.dat", std::ios::app);
             archivoCarga << B->getHostname() << ", ";
             archivoCarga << A->getHostname() << ", ";
             archivoCarga << A->relaciones->buscarRelacion(B)->getPing() << ", ";
@@ -517,7 +501,7 @@ class Utilitaria{
 
         void cargarResultado(string resultado){
 
-            archivoCarga.open("../resultados.dat", std::ios::app);
+            archivoCarga.open("../resultados.out", std::ios::app);
             archivoCarga << resultado << endl;
             archivoCarga.close();
 
@@ -525,7 +509,7 @@ class Utilitaria{
 
         void cargarRuta(string hostname){
             
-            archivoCarga.open("../resultados.dat", std::ios::app);
+            archivoCarga.open("../resultados.out", std::ios::app);
             archivoCarga << hostname << ", ";
             archivoCarga.close();
             
@@ -533,7 +517,7 @@ class Utilitaria{
 
         void cargarRuta(string hostname, int saltos){
 
-            archivoCarga.open("../resultados.dat", std::ios::app);
+            archivoCarga.open("../resultados.out", std::ios::app);
             archivoCarga << "Saltos: " << saltos;
             archivoCarga << ", Ping: " << pingRuta[constPing];
             archivoCarga << endl;
@@ -671,7 +655,7 @@ class Utilitaria{
         }
 
         void MostrarArchivo3() {
-            ifstream archivoCarga("../Rutas_resp.dat");
+            ifstream archivoCarga("../rutas_resp.dat");
             if (archivoCarga.is_open()) {
                 string linea;
                 while (getline(archivoCarga, linea)) {
@@ -685,8 +669,6 @@ class Utilitaria{
 };
 
 Utilitaria tool;
-
-//5.3 Funcion para eliminar rutas indirectas
 
 void eliminarRutas(Dispositivo* origen, Dispositivo* destino, bool &hayRutas, int &cantidadEliminada){
 
@@ -723,8 +705,6 @@ void eliminarRutas(Dispositivo* origen, Dispositivo* destino, bool &hayRutas, in
 
 }
 
-//SECCION 6: CLASE Utilitaria
-
 void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
     
     tool.CargarDispositivoDelete(Dispositivo->getHostname(), Dispositivo->getIp());
@@ -753,10 +733,6 @@ void ListaDispositivo::eliminarDispositivo(Dispositivo *Dispositivo){
     delete Dispositivo;
 }
 
-//Funciones de cada parte del Menú
-
-// AGREGRAR DISPOSITIVO: Agrega dispositivos a la lista de dispositivos desde el menu.
-
 void agregarDispositivo(){
 
     string hostname;
@@ -784,8 +760,6 @@ void agregarDispositivo(){
     }
 
 }
-
-//AGREGAR RUTA: Agrega rutas entre dispositivos desde el menu.
 
 void agregarRuta(){
 
@@ -843,8 +817,6 @@ void agregarRuta(){
     }
 
 }
-
-//ELIMINAR RUTA: Elimina rutas entre dispositivos desde el menu
 
 void eliminarRuta(){
 
@@ -1138,8 +1110,6 @@ void dispositivosAdyacentes(){
 
 }
 
-//Funcion que imprime en pantalla los datos de universidad, facultad, escuela etc...
-
 void identificacion(){
     cout<<"Universidad Central de Venezuela"<<endl;
     cout<<"Facultad de Ciencias"<<endl;
@@ -1147,9 +1117,6 @@ void identificacion(){
     cout<<"Carlos Zavarce V30136703, Miguel Ciavato V30541929"<<endl;
     cout<<endl<<"Menu de opciones: "<<endl;
 }
-
-/*Funcion que muestra los sub-menus, retorna true si se regresa al menu principal,
-retorna false si se quiere salir de la aplicacion*/
 
 bool sub_menu(char opcion){
     
@@ -1402,8 +1369,6 @@ void menu(){
 int main(){
 
     menu();
-
-    //Commit salvador
 
     return 0;
 }
