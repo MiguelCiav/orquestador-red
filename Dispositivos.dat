@@ -1,15 +1,15 @@
 6
-J, 1
-A, 1
-B, 2
-C, 3
-D, 4
 H, 4
+D, 4
+C, 3
+B, 2
+A, 1
+J, 1
 
 6
-A, B, 141, 5g
-A, D, 512, f145
-A, H, 515, FFE
-B, C, 12415, 5G
-C, D, 556, jfjf
-D, H, 5451, FFEF
+H, D, 2, FFEF
+H, A, 2, FFE
+D, C, 2, jfjf
+D, A, 2, f145
+C, B, 2, 5G
+B, A, 2, 5g
