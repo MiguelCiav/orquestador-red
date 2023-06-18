@@ -1030,6 +1030,8 @@ void buscarRutasEntreDispositivos(){
     cin>>ipOHostname1;
     cin>>ipOHostname2;
 
+    quitarComa(ipOHostname1);
+
     D1 = NewLD.buscarPorHostname(ipOHostname1);
 
     if(D1 == nullptr){
